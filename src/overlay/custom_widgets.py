@@ -1,11 +1,17 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from overlay.i18n import tr
+
 
 class CustomKeySequenceEdit(QtWidgets.QKeySequenceEdit):
     key_changed = QtCore.pyqtSignal(str)
 
     def __init__(self, parent=None):
         super(CustomKeySequenceEdit, self).__init__(parent)
+        # Localize only the prompt; native key names remain usable by keyboard.
+        line_edit = self.findChild(QtWidgets.QLineEdit)
+        if line_edit is not None:
+            line_edit.setPlaceholderText(tr("Press shortcut"))
 
     def keyPressEvent(self, QKeyEvent):
         super(CustomKeySequenceEdit, self).keyPressEvent(QKeyEvent)

@@ -3,6 +3,7 @@ from typing import Dict, Optional
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from overlay.i18n import tr
 from overlay.aoe4_data import civ_data, map_data
 from overlay.helper_func import file_path
 
@@ -42,7 +43,7 @@ class RandomTab(QtWidgets.QWidget):
         civ_layout.addItem(QtWidgets.QSpacerItem(0, 100))
 
         # Randomize civ
-        rnd_civ = QtWidgets.QPushButton("Randomize civ")
+        rnd_civ = QtWidgets.QPushButton(tr("Randomize civ"))
         rnd_civ.clicked.connect(self.randomize_civ)
         rnd_civ.setMinimumHeight(30)
         civ_layout.addWidget(rnd_civ)
@@ -65,7 +66,7 @@ class RandomTab(QtWidgets.QWidget):
         map_layout.addItem(QtWidgets.QSpacerItem(0, 30))
 
         # Randomize map
-        rnd_map = QtWidgets.QPushButton("Randomize map")
+        rnd_map = QtWidgets.QPushButton(tr("Randomize map"))
         rnd_map.clicked.connect(self.randomize_map)
         rnd_map.setMinimumHeight(30)
         map_layout.addWidget(rnd_map)

@@ -10,6 +10,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from overlay.email_log import send_email_log
 from overlay.helper_func import file_path, is_compiled, pyqt_wait
+from overlay.i18n import set_language, tr
 from overlay.logging_func import get_logger
 from overlay.settings import CONFIG_FOLDER, settings
 from overlay.tab_main import TabWidget
@@ -78,15 +79,15 @@ class MainApp(QtWidgets.QMainWindow):
 
         ### Create menu bar items
         menubar = self.menuBar()
-        file_menu = menubar.addMenu('File')
+        file_menu = menubar.addMenu(tr('File'))
         # graphs_menu = menubar.addMenu('Graphs')
-        settings_menu = menubar.addMenu('Settings')
-        link_menu = menubar.addMenu('Links')
+        settings_menu = menubar.addMenu(tr('Settings'))
+        link_menu = menubar.addMenu(tr('Links'))
 
         # Html
         icon = self.style().standardIcon(
             getattr(QtWidgets.QStyle, 'SP_DirLinkIcon'))
-        htmlAction = QtWidgets.QAction(icon, 'Html files', self)
+        htmlAction = QtWidgets.QAction(icon, tr('Html files'), self)
         htmlAction.triggered.connect(
             lambda: subprocess.run(['explorer', file_path("html")]))
         file_menu.addAction(htmlAction)
@@ -94,7 +95,7 @@ class MainApp(QtWidgets.QMainWindow):
         # Config
         icon = self.style().standardIcon(
             getattr(QtWidgets.QStyle, 'SP_DirLinkIcon'))
-        htmlAction = QtWidgets.QAction(icon, 'Config/logs', self)
+        htmlAction = QtWidgets.QAction(icon, tr('Config/logs'), self)
         htmlAction.triggered.connect(
             lambda: subprocess.run(['explorer', CONFIG_FOLDER]))
         file_menu.addAction(htmlAction)
@@ -102,7 +103,7 @@ class MainApp(QtWidgets.QMainWindow):
         # Exit
         icon = self.style().standardIcon(
             getattr(QtWidgets.QStyle, 'SP_DialogCloseButton'))
-        exitAction = QtWidgets.QAction(icon, 'Exit', self)
+        exitAction = QtWidgets.QAction(icon, tr('Exit'), self)
         exitAction.triggered.connect(QtWidgets.qApp.quit)
         file_menu.addAction(exitAction)
 
@@ -115,7 +116,7 @@ class MainApp(QtWidgets.QMainWindow):
         # settings_menu.addAction(email_action)
 
         # Log matches
-        mach_log_action = QtWidgets.QAction('Log match data', self)
+        mach_log_action = QtWidgets.QAction(tr('Log match data'), self)
         mach_log_action.setCheckable(True)
         mach_log_action.setChecked(settings.log_matches)
         mach_log_action.triggered.connect(
@@ -124,7 +125,7 @@ class MainApp(QtWidgets.QMainWindow):
 
         # Github
         icon = QtGui.QIcon(file_path("img/github.png"))
-        githubAction = QtWidgets.QAction(icon, 'App on Github', self)
+        githubAction = QtWidgets.QAction(icon, tr('App on Github'), self)
         githubAction.triggered.connect(
             partial(webbrowser.open,
                     "https://github.com/FluffyMaguro/AoE4_Overlay"))
@@ -132,7 +133,7 @@ class MainApp(QtWidgets.QMainWindow):
 
         # Discord
         icon = QtGui.QIcon(file_path("img/discord.png"))
-        mdiscordAction = QtWidgets.QAction(icon, 'My discord', self)
+        mdiscordAction = QtWidgets.QAction(icon, tr('My discord'), self)
         mdiscordAction.triggered.connect(
             partial(webbrowser.open, "https://discord.gg/FtGdhqD"))
         link_menu.addAction(mdiscordAction)
@@ -146,7 +147,7 @@ class MainApp(QtWidgets.QMainWindow):
 
         # Paypal
         icon = QtGui.QIcon(file_path("img/paypal.png"))
-        paypalAction = QtWidgets.QAction(icon, 'Donate', self)
+        paypalAction = QtWidgets.QAction(icon, tr('Donate'), self)
         paypalAction.triggered.connect(
             partial(webbrowser.open,
                     "https://www.paypal.com/paypalme/FluffyMaguro"))
@@ -209,6 +210,7 @@ class MainApp(QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
     settings.load()
+    set_language(settings.language)
     app = QtWidgets.QApplication(sys.argv)
     Main = MainApp()
     exit_event = app.exec_()

@@ -25,6 +25,10 @@ API calls are done through [AoE4World.com](https://aoe4world.com/). For build or
 * Download and extract the archive.
 * Run `AoE4_Overlay.exe`.
 
+Windows source builds: [Windows 打包说明](docs/windows-build.md).
+For automated builds, use **Actions → Windows build → Run workflow** after pushing
+the workflow to GitHub. Download the Windows package from the run's **Artifacts**.
+
 **Linux** 
 * ```cd ~/Documents```
 * ```git clone https://github.com/FluffyMaguro/AoE4_Overlay.git```
@@ -41,6 +45,26 @@ API calls are done through [AoE4World.com](https://aoe4world.com/). For build or
 
 → *Note: To update the app delete the app folder and extract the new archive elsewhere.*
   
+## Desktop interface language / 桌面界面语言
+
+The desktop app starts in English by default. In **Settings → Language / 语言**,
+choose **English** or **简体中文**, then restart the app. The preference is saved
+immediately; the current interface keeps its language until restart.
+
+程序默认使用英文。在 **Settings（设置）→ Language / 语言** 中选择 **简体中文**，
+然后重启程序即可生效。语言偏好会立即保存，当前界面在重启前保持原语言。
+
+Translation covers desktop menus, buttons, table headers, instructions, tooltips,
+and status messages. Civilization/map names, game modes/results, dates, player
+names, saved build orders, both floating overlays, and OBS output retain their
+original content. No changes to `custom.css` or `custom.js` are required.
+
+汉化仅覆盖桌面操作界面的菜单、按钮、表头、说明和提示。文明与地图名称、
+对局模式与结果、日期、玩家名、已保存的建造顺序、两种悬浮窗及 OBS 输出保持原样。
+
+The proposed fixes for five known issues are documented in
+[优先问题修复方案](docs/priority-fixes.md); these fixes are not part of the language update.
+
 # Build orders
   * Two build orders types are available:
     * *Simple TXT*

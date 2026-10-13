@@ -2,6 +2,7 @@ import json
 import os
 from typing import Dict, List, Optional
 
+from overlay.i18n import normalize_language
 from overlay.logging_func import CONFIG_FOLDER, get_logger
 
 logger = get_logger(__name__)
@@ -11,6 +12,7 @@ CONFIG_FILE = os.path.join(CONFIG_FOLDER, "config.json")
 class _Settings:
 
     def __init__(self):
+        self.language: str = "en"
         self.websocket_port: int = 7307
         self.send_email_logs: bool = True
         self.log_matches: bool = True
@@ -89,6 +91,7 @@ class _Settings:
 
         for key in data:
             setattr(self, key, data[key])
+        self.language = normalize_language(self.language)
 
     def save(self):
         """ Saves configuration to app data"""

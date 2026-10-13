@@ -2,6 +2,7 @@ from typing import Any, Callable, Dict
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from overlay.i18n import tr
 from overlay.aoe4_data import civ_data
 from overlay.helper_func import file_path, zeroed
 from overlay.logging_func import get_logger
@@ -41,9 +42,9 @@ class InnerPlayer(PlayerWidget):
 
         self.name = QtWidgets.QLineEdit()
         self.team_cb = QtWidgets.QComboBox()
-        self.team_cb.addItem("No team")
+        self.team_cb.addItem(tr("No team"))
         for i in range(1, 3):
-            self.team_cb.addItem(f"Team {i}")
+            self.team_cb.addItem(tr("Team {number}", number=i))
         self.rating = QtWidgets.QLineEdit()
         self.country = QtWidgets.QLabel()
         self.rank = QtWidgets.QLineEdit()
@@ -125,6 +126,13 @@ class InnerOverlay(AoEOverlay):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.change_to_editable()
+        # Only the embedded editor's headers are translated. AoEOverlay remains English.
+        for index in range(self.playerlayout.count()):
+            row, _, _, _ = self.playerlayout.getItemPosition(index)
+            widget = self.playerlayout.itemAt(index).widget()
+            if row == 0 and isinstance(widget, QtWidgets.QLabel):
+                widget.setText(tr(widget.text(), context="stats"))
+        self.civ_stats_label.textlabel = tr(self.civ_stats_label.textlabel)
         self.setStyleSheet(
             "background-color: #222; color: white; font-size: 11pt")
         self.hiding_civ_stats = False
@@ -183,11 +191,12 @@ class OverrideTab(QtWidgets.QWidget):
 
         # Description
         desc = QtWidgets.QLabel(
-            """Here you can override what is being shown on the overlay.<br><br>\
-             <b>Override</b> will apply these values.<br>\
-             <b>Reset</b> will reset the overlay and this to current live values.<br>\
-             <b>Prevent automatic update</b> will prevent automatic updating with new games."""
+            tr("Here you can override what is being shown on the overlay.<br><br>"
+               "<b>Override</b> will apply these values.<br>"
+               "<b>Reset</b> will reset the overlay and this to current live values.<br>"
+               "<b>Prevent automatic update</b> will prevent automatic updating with new games.")
         )
+        desc.setWordWrap(True)
 
         top_layout.addWidget(desc)
 
@@ -196,19 +205,19 @@ class OverrideTab(QtWidgets.QWidget):
         top_layout.addLayout(hlayout)
 
         # Override overlay
-        override_btn = QtWidgets.QPushButton("Override")
+        override_btn = QtWidgets.QPushButton(tr("Override"))
         override_btn.clicked.connect(self.override_overlay)
         override_btn.setMaximumWidth(150)
         override_btn.setShortcut("Return")
         hlayout.addWidget(override_btn)
 
         # Reset overlay
-        reset_btn = QtWidgets.QPushButton("Reset")
+        reset_btn = QtWidgets.QPushButton(tr("Reset"))
         reset_btn.clicked.connect(self.reset_overlay)
         reset_btn.setMaximumWidth(150)
         hlayout.addWidget(reset_btn)
 
-        self.prevent_ck = QtWidgets.QCheckBox("Prevent automatic update")
+        self.prevent_ck = QtWidgets.QCheckBox(tr("Prevent automatic update"))
         self.prevent_ck.stateChanged.connect(
             lambda: self.update_override.emit(self.prevent_ck.isChecked()))
         hlayout.addWidget(self.prevent_ck)

@@ -1,0 +1,4 @@
+# Keep the Windows CI and manual build toolchain in sync.
+Nuitka==4.3
+ordered-set==4.1.0
+zstandard==0.25.0

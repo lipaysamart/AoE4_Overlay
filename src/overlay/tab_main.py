@@ -9,6 +9,7 @@ import keyboard
 from PyQt5 import QtWidgets
 
 import overlay.helper_func as hf
+from overlay.i18n import tr
 from overlay.api_checking import Api_checker, get_full_match_history
 from overlay.logging_func import get_logger, log_match
 from overlay.settings import settings
@@ -46,13 +47,13 @@ class TabWidget(QtWidgets.QTabWidget):
         self.settigns_tab = SettingsTab(self)
         self.settigns_tab.new_profile.connect(self.new_profile_found)
 
-        self.addTab(self.settigns_tab, "Settings")
-        self.addTab(self.games_tab, "Games")
+        self.addTab(self.settigns_tab, tr("Settings"))
+        self.addTab(self.games_tab, tr("Games"))
         # self.addTab(self.graph_tab, "Rating")
         # self.addTab(self.stats_tab, "Stats")
-        self.addTab(self.build_order_tab, "Build orders")
-        self.addTab(self.random_tab, "Randomize")
-        self.addTab(self.override_tab, "Override")
+        self.addTab(self.build_order_tab, tr("Build orders"))
+        self.addTab(self.random_tab, tr("Randomize"))
+        self.addTab(self.override_tab, tr("Override"))
 
     def start(self):
         logger.info(

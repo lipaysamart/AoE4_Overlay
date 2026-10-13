@@ -4,6 +4,7 @@ from typing import Any, Dict, List
 
 from PyQt5 import QtCore, QtWidgets
 
+from overlay.i18n import tr
 from overlay.logging_func import catch_exceptions, get_logger
 from overlay.settings import settings
 
@@ -77,7 +78,7 @@ class MatchEntry:
         # aoe4world Link
         game_id = match_data["game_id"]
         link = QtWidgets.QLabel(
-            f'<a href="https://aoe4world.com/players/{settings.profile_id}/games/{game_id}"> game link</a>'
+            f'<a href="https://aoe4world.com/players/{settings.profile_id}/games/{game_id}"> {tr("game link")}</a>'
         )
         link.setOpenExternalLinks(True)
 
@@ -136,13 +137,13 @@ class MatchHistoryTab(QtWidgets.QWidget):
         self.setLayout(layout)
 
         # Header
-        self.scroll_layout.addWidget(QtWidgets.QLabel("Team 1"), 0, 0)
-        self.scroll_layout.addWidget(QtWidgets.QLabel("Team 2"), 0, 1)
-        self.scroll_layout.addWidget(QtWidgets.QLabel("Map"), 0, 2)
-        self.scroll_layout.addWidget(QtWidgets.QLabel("Started"), 0, 3)
-        self.scroll_layout.addWidget(QtWidgets.QLabel("Mode"), 0, 4)
-        self.scroll_layout.addWidget(QtWidgets.QLabel("Result"), 0, 5)
-        self.scroll_layout.addWidget(QtWidgets.QLabel("Rating diff"), 0, 6)
+        self.scroll_layout.addWidget(QtWidgets.QLabel(tr("Team 1")), 0, 0)
+        self.scroll_layout.addWidget(QtWidgets.QLabel(tr("Team 2")), 0, 1)
+        self.scroll_layout.addWidget(QtWidgets.QLabel(tr("Map")), 0, 2)
+        self.scroll_layout.addWidget(QtWidgets.QLabel(tr("Started")), 0, 3)
+        self.scroll_layout.addWidget(QtWidgets.QLabel(tr("Mode")), 0, 4)
+        self.scroll_layout.addWidget(QtWidgets.QLabel(tr("Result")), 0, 5)
+        self.scroll_layout.addWidget(QtWidgets.QLabel(tr("Rating diff")), 0, 6)
         self.scroll_layout.addWidget(QtWidgets.QLabel("AoE4World"), 0, 7)
 
         self.header_widgets = set()

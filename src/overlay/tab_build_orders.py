@@ -5,6 +5,7 @@ import pathlib
 import keyboard
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from overlay.i18n import tr
 from overlay.build_order_tools import (
     MultiQLabelDisplay, QLabelSettings,
     check_valid_aoe4_build_order_from_string, civilization_flags)
@@ -331,7 +332,7 @@ class BoTab(QtWidgets.QWidget):
         self.font_size_combo = QtWidgets.QComboBox()  # overlay font
         self.image_height_combo = QtWidgets.QComboBox()  # images height
         self.button_change_position = QtWidgets.QPushButton(
-            "Change BO overlay position")  # change overlay position
+            tr("Change BO overlay position"))  # change overlay position
 
         # hotkeys
         self.key_show_hide = CustomKeySequenceEdit(self)
@@ -396,7 +397,7 @@ class BoTab(QtWidgets.QWidget):
         horizontal_layout.addWidget(control_frame)
 
         # renaming build orders
-        self.naming_widget.setToolTip("Adapt the build order name here")
+        self.naming_widget.setToolTip(tr("Adapt the build order name here"))
         self.naming_widget.setTextMargins(3, 0, 0, 0)
         vertical_layout.addWidget(self.naming_widget)
 
@@ -413,76 +414,76 @@ class BoTab(QtWidgets.QWidget):
             self.cycle_overlay()
 
         # add build order
-        add_bo_button = QtWidgets.QPushButton("Add build order")
+        add_bo_button = QtWidgets.QPushButton(tr("Add build order"))
         add_bo_button.clicked.connect(self.add_build_order)
         vertical_layout.addWidget(add_bo_button)
 
         # remove build order
-        remove_bo_btn = QtWidgets.QPushButton("Remove build order")
+        remove_bo_btn = QtWidgets.QPushButton(tr("Remove build order"))
         remove_bo_btn.clicked.connect(self.remove_build_order)
         vertical_layout.addWidget(remove_bo_btn)
 
         # move build order up
-        move_up_bo_btn = QtWidgets.QPushButton("Move build order up")
+        move_up_bo_btn = QtWidgets.QPushButton(tr("Move build order up"))
         move_up_bo_btn.clicked.connect(self.move_build_order_up)
         vertical_layout.addWidget(move_up_bo_btn)
 
         # move build order down
-        move_down_bo_btn = QtWidgets.QPushButton("Move build order down")
+        move_down_bo_btn = QtWidgets.QPushButton(tr("Move build order down"))
         move_down_bo_btn.clicked.connect(self.move_build_order_down)
         vertical_layout.addWidget(move_down_bo_btn)
 
         vertical_layout.addSpacing(30)
         age4builder = QtWidgets.QLabel(
-            'Find & copy build orders from <a href="https://age4builder.com/">age4builder.com</a><br>or <a href="https://aoe4guides.com/">aoe4guides.com</a>.'
+            tr('Find & copy build orders from <a href="https://age4builder.com/">age4builder.com</a><br>or <a href="https://aoe4guides.com/">aoe4guides.com</a>.')
         )
         age4builder.setOpenExternalLinks(True)
         vertical_layout.addWidget(age4builder)
 
         # overlay control (hotkeys...)
         vertical_layout.addSpacing(10)
-        overlay_box = QtWidgets.QGroupBox("Overlay")
+        overlay_box = QtWidgets.QGroupBox(tr("Overlay"))
         overlay_layout = QtWidgets.QGridLayout()
         overlay_box.setLayout(overlay_layout)
         vertical_layout.addWidget(overlay_box)
 
         # show/hide hotkey
-        key_label = QtWidgets.QLabel("Hotkey for showing and hiding overlay:")
+        key_label = QtWidgets.QLabel(tr("Hotkey for showing and hiding overlay:"))
         overlay_layout.addWidget(key_label, 0, 0)
         self.key_show_hide.setMaximumWidth(100)
-        self.key_show_hide.setToolTip("Hotkey for showing and hiding overlay.")
+        self.key_show_hide.setToolTip(tr("Hotkey for showing and hiding overlay."))
         overlay_layout.addWidget(self.key_show_hide, 0, 1)
         self.key_show_hide.key_changed.connect(self.show_hotkey_changed)
 
         # cycle hotkey
-        key_label = QtWidgets.QLabel("Hotkey for cycling build orders:")
+        key_label = QtWidgets.QLabel(tr("Hotkey for cycling build orders:"))
         overlay_layout.addWidget(key_label, 1, 0)
         self.key_cycle.setMaximumWidth(100)
-        self.key_cycle.setToolTip("Hotkey for cycling build orders.")
+        self.key_cycle.setToolTip(tr("Hotkey for cycling build orders."))
         overlay_layout.addWidget(self.key_cycle, 1, 1)
         self.key_cycle.key_changed.connect(self.cycle_hotkey_changed)
 
         # previous build order step hotkey
-        key_label = QtWidgets.QLabel("Hotkey to go to previous step:")
+        key_label = QtWidgets.QLabel(tr("Hotkey to go to previous step:"))
         overlay_layout.addWidget(key_label, 2, 0)
         self.key_previous_step.setMaximumWidth(100)
         self.key_previous_step.setToolTip(
-            "Hotkey to go to the previous step of the build order.")
+            tr("Hotkey to go to the previous step of the build order."))
         overlay_layout.addWidget(self.key_previous_step, 2, 1)
         self.key_previous_step.key_changed.connect(
             self.previous_step_hotkey_changed)
 
         # next build order step hotkey
-        key_label = QtWidgets.QLabel("Hotkey to go to next step:")
+        key_label = QtWidgets.QLabel(tr("Hotkey to go to next step:"))
         overlay_layout.addWidget(key_label, 3, 0)
         self.key_next_step.setMaximumWidth(100)
         self.key_next_step.setToolTip(
-            "Hotkey to go to the next step of the build order.")
+            tr("Hotkey to go to the next step of the build order."))
         overlay_layout.addWidget(self.key_next_step, 3, 1)
         self.key_next_step.key_changed.connect(self.next_step_hotkey_changed)
 
         # overlay font
-        font_label = QtWidgets.QLabel("Overlay font size:")
+        font_label = QtWidgets.QLabel(tr("Overlay font size:"))
         overlay_layout.addWidget(font_label, 4, 0)
         for i in range(1, 51):
             self.font_size_combo.addItem(f"{i} pt")
@@ -492,7 +493,7 @@ class BoTab(QtWidgets.QWidget):
         overlay_layout.addWidget(self.font_size_combo, 4, 1)
 
         # images height
-        image_height_label = QtWidgets.QLabel("Overlay images height:")
+        image_height_label = QtWidgets.QLabel(tr("Overlay images height:"))
         overlay_layout.addWidget(image_height_label, 5, 0)
         for i in range(1, 101):
             self.image_height_combo.addItem(f"{i} px")
@@ -503,7 +504,7 @@ class BoTab(QtWidgets.QWidget):
 
         # Position change button
         self.button_change_position.setToolTip(
-            "Click to change BO overlay position. Click again to fix its position."
+            tr("Click to change BO overlay position. Click again to fix its position.")
         )
         self.button_change_position.clicked.connect(
             self.overlay.change_position_state)
