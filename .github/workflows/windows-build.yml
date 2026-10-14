@@ -3,7 +3,12 @@ name: Windows build
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, dev]
+    # Tag pushes skip the path filter (GitHub does not evaluate paths for tags)
+    # and publish a GitHub release. Only strict vX.Y.Z tags are accepted here;
+    # the build job validates the tag against the application VERSION as well.
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
     paths:
       - '.github/workflows/windows-build.yml'
       - 'src/**'
@@ -12,7 +17,7 @@ on:
       - 'requirements-build.txt'
       - 'LICENSE'
   pull_request:
-    branches: [main]
+    branches: [main, dev]
     paths:
       - '.github/workflows/windows-build.yml'
       - 'src/**'
@@ -44,6 +49,23 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+
+      - name: Validate release tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          $Tag = '${{ github.ref_name }}'
+          if ($Tag -notmatch '^v\d+\.\d+\.\d+$') {
+            throw "Release tag '$Tag' must match vX.Y.Z"
+          }
+          $VersionMatch = Select-String -Path 'src/AoE4_Overlay.py' -Pattern '^VERSION = "([^"]+)"$'
+          if (-not $VersionMatch) {
+            throw 'Could not read VERSION from src/AoE4_Overlay.py'
+          }
+          $AppVersion = $VersionMatch.Matches[0].Groups[1].Value
+          if ("v$AppVersion" -ne $Tag) {
+            throw "Release tag '$Tag' does not match src VERSION '$AppVersion'"
+          }
+          Write-Output "Release tag $Tag matches app VERSION $AppVersion"
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
@@ -161,3 +183,27 @@ jobs:
             build-win/compilation-report.xml
           if-no-files-found: warn
           retention-days: 14
+
+  release:
+    name: Publish GitHub release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Windows package
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: AoE4_Overlay-windows-x64
+          path: release-assets
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "AoE4 Overlay ${GITHUB_REF_NAME}" \
+            --generate-notes \
+            --verify-tag \
+            release-assets/AoE4_Overlay.zip release-assets/SHA256SUMS.txt

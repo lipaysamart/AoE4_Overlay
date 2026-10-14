@@ -19,15 +19,21 @@ Windows 2022 runner、Python 3.11 x64 和 MSVC，先运行桌面测试，再构�
 
 提交并推送项目改动后，可在 GitHub 仓库的 **Actions → Windows build →
 Run workflow** 中选择分支并启动。手动入口需要该工作流已存在于默认分支。
-它也会在 `main` 上的源码、测试、依赖、许可证或工作流变更时自动运行，并验证
-面向 `main` 的相关 PR。仅修改说明文档不会触发自动构建。
+它也会在 `main` 或 `dev` 上的源码、测试、依赖、许可证或工作流变更时自动运行，
+并验证面向这两个分支的相关 PR；仅修改说明文档不会触发自动构建。
+
+推送形如 `v1.2.3` 的标签会构建正式版本并在构建成功后创建 GitHub Release，
+并附上 `AoE4_Overlay.zip` 与 `SHA256SUMS.txt`。标签推送不经过路径过滤，
+且只接受 `v` 加三段数字的格式；构建前会校验标签与应用内 `VERSION` 一致，
+不一致时在构建阶段直接失败，不会产出程序包或 Release。
 
 构建成功后，在运行页面的 **Artifacts** 下载 `AoE4_Overlay-windows-x64`。
 下载的 artifact 包含 `AoE4_Overlay.zip` 和 `SHA256SUMS.txt`；解压前者后即可
 运行程序。构建日志、依赖记录及编译报告保存在 `windows-build-diagnostics`，
 失败时也会尝试上传。程序包保留 30 天，诊断文件保留 14 天。
 
-此工作流上传构建产物，不自动创建 GitHub Release，不需要配置额外 Secrets。
+此工作流在分支运行时把构建产物上传为 Actions artifact（保留 30 天），
+在版本标签运行时额外创建 GitHub Release；不需要配置额外 Secrets。
 产物结构检查不能替代真实 Windows 上的 GUI、全局快捷键与 OBS 人工验收。
 同一分支或 PR 的新运行会取消尚未完成的旧运行。
 
