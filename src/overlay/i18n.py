@@ -40,6 +40,8 @@ TRANSLATIONS = {
         "AoE4 World profile": "AoE4 World 玩家资料",
         "Player found!": "已找到玩家！",
         "Failed to find such player!": "未找到该玩家！",
+        "Retry": "重试",
+        "Retry the last failed request": "重试上一次失败的请求",
         "Failed to use this hotkey": "无法使用此快捷键",
         "Press shortcut": "按下快捷键",
         "Restart the app to apply the language change.": "重启程序后语言设置生效。",

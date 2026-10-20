@@ -35,6 +35,7 @@ class TabWidget(QtWidgets.QTabWidget):
         self.websocket_manager = Websocket_manager(settings.websocket_port)
         self.force_stop: bool = False
         self.prevent_overlay_update: bool = False
+        self.last_history_amount: int = 10000
 
         self.games_tab = MatchHistoryTab(self)
         # self.graph_tab = GraphTab(self)
@@ -82,11 +83,14 @@ class TabWidget(QtWidgets.QTabWidget):
 
     def update_with_match_history_data(self, amount: int):
         """ Gets match history and updates games tab and passes data to stats tab"""
+        self.last_history_amount = amount
         scheldule(self.got_match_history, get_full_match_history, amount)
 
     def got_match_history(self, match_history: List[Any]):
         if match_history is None:
-            self.settigns_tab.aoe4net_error_msg()
+            self.settigns_tab.aoe4net_error_msg(
+                retry_callback=lambda: self.update_with_match_history_data(
+                    self.last_history_amount))
             logger.warning("No match history data")
             return
         self.settigns_tab.message("")

@@ -1,8 +1,9 @@
 import json
 from types import TracebackType
-from typing import Tuple, Type
+from typing import Callable, Optional, Tuple, Type
 
 import keyboard
+import requests
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from overlay.i18n import get_language, tr
@@ -23,6 +24,7 @@ class SettingsTab(QtWidgets.QWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.overlay_widget = AoEOverlay()
+        self._retry_callback: Optional[Callable] = None
         self.init_UI()
         self.show_hide_overlay.connect(self.overlay_widget.show_hide)
 
@@ -138,10 +140,20 @@ class SettingsTab(QtWidgets.QWidget):
         self.main_layout.addWidget(language_box)
 
         ### Messages
+        msg_layout = QtWidgets.QHBoxLayout()
         self.msg = QtWidgets.QLabel()
         self.msg.setOpenExternalLinks(True)
         self.msg.setWordWrap(True)
-        self.main_layout.addWidget(self.msg)
+        msg_layout.addWidget(self.msg, 1)
+
+        # Retry button (shown only when a request fails)
+        self.retry_button = QtWidgets.QPushButton(tr("Retry"))
+        self.retry_button.setMaximumWidth(100)
+        self.retry_button.setToolTip(tr("Retry the last failed request"))
+        self.retry_button.clicked.connect(self.retry_last_action)
+        self.retry_button.hide()
+        msg_layout.addWidget(self.retry_button)
+        self.main_layout.addLayout(msg_layout)
 
         # Create update button
         self.update_button = QtWidgets.QPushButton(tr("New update!"))
@@ -223,14 +235,29 @@ class SettingsTab(QtWidgets.QWidget):
         """ Shows a message"""
         self.msg.setText(text)
         self.msg.setStyleSheet(f"color: {color}")
+        if not text:
+            # Clearing the message also clears any pending retry action
+            self._retry_callback = None
+            self.retry_button.hide()
 
-    def aoe4net_error_msg(self):
+    def aoe4net_error_msg(self, retry_callback: Optional[Callable] = None):
+        """ Shows an API error message, optionally with a retry button """
         self.message(
             tr('An issue with <a href="https://aoeiv.net/">AoEIV.net</a> servers. Data shown on the overlay are unaffected,<br> '
                'but other stats in this app might not show correctly.<br>For additional stats check your '
                '<a href="https://aoe4world.com/players/{profile_id}">AoE4 World profile</a>.',
                profile_id=settings.profile_id),
             color='red')
+        self._retry_callback = retry_callback
+        self.retry_button.setVisible(retry_callback is not None)
+
+    def retry_last_action(self):
+        """ Retries the last failed request """
+        callback = self._retry_callback
+        self.message("")
+        if callback is not None:
+            logger.info("Retrying the last failed request")
+            callback()
 
     def find_profile(self):
         """ Attempts to find player ids based on provided text (name, either id)"""
@@ -248,12 +275,14 @@ class SettingsTab(QtWidgets.QWidget):
     def error_when_finding_profile(self,
                                    exc_data: Tuple[Type[BaseException],
                                                    Exception, TracebackType]):
-        """ Decoding error when finding player profile indicates an issue with AoEIV.net"""
+        """ Invalid responses and failed requests when finding a player profile
+        indicate an issue with the API servers or the connection"""
         exctype, value, formatted = exc_data
-        if exctype == json.decoder.JSONDecodeError:
-            self.aoe4net_error_msg()
+        if issubclass(exctype, (json.decoder.JSONDecodeError,
+                                requests.RequestException)):
+            self.aoe4net_error_msg(retry_callback=self.find_profile)
             logger.warning(
-                f"Decoding error when finding a player\n{formatted}")
+                f"API error when finding a player\n{formatted}")
         else:
             logger.warning(formatted)
 
