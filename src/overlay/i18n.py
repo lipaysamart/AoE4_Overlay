@@ -42,6 +42,22 @@ TRANSLATIONS = {
         "Failed to find such player!": "未找到该玩家！",
         "Retry": "重试",
         "Retry the last failed request": "重试上一次失败的请求",
+        "API endpoint:": "数据接口地址：",
+        "Add": "添加",
+        "Remove": "移除",
+        "Test connection": "测试连接",
+        "Test the connection to the selected API endpoint": "测试与所选数据接口的连接",
+        "Auto-switch endpoint on failure": "连接失败时自动切换备用地址",
+        "Automatically switch to a backup API endpoint when requests keep failing":
+            "当请求持续失败时自动切换到备用数据接口。",
+        "Testing connection...": "正在测试连接…",
+        "Connection OK ({latency} ms)": "连接正常（{latency} 毫秒）",
+        "Connection failed": "连接失败",
+        "Invalid address": "地址无效",
+        "Endpoint added": "已添加备用地址",
+        "Endpoint removed": "已移除备用地址",
+        "Keep at least one endpoint": "至少保留一个地址",
+        "API endpoint switched": "已切换数据接口",
         "Failed to use this hotkey": "无法使用此快捷键",
         "Press shortcut": "按下快捷键",
         "Restart the app to apply the language change.": "重启程序后语言设置生效。",
@@ -87,8 +103,8 @@ TRANSLATIONS = {
         "Losses": "负场",
         "Wintime": "获胜时长",
         "CIV STATS": "文明统计",
-        'An issue with <a href="https://aoeiv.net/">AoEIV.net</a> servers. Data shown on the overlay are unaffected,<br> but other stats in this app might not show correctly.<br>For additional stats check your <a href="https://aoe4world.com/players/{profile_id}">AoE4 World profile</a>.':
-            '<a href="https://aoeiv.net/">AoEIV.net</a> 服务出现问题。悬浮窗数据不受影响，<br>但程序中的其他统计可能无法正常显示。<br>可在 <a href="https://aoe4world.com/players/{profile_id}">AoE4 World 玩家资料</a>中查看其他统计。',
+        'Cannot reach the API endpoint ({endpoint}).<br>Check your network or proxy, or switch to a backup API endpoint below.':
+            '无法连接数据接口（{endpoint}）。<br>请检查网络或代理，或在下方切换 API 备用地址。',
     }
 }
 

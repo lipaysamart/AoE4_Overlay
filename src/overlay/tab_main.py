@@ -117,8 +117,11 @@ class TabWidget(QtWidgets.QTabWidget):
             self.update_with_match_history_data(2)
 
         elif 'server_down' in game_data:
-            self.settigns_tab.aoe4net_error_msg()
+            self.settigns_tab.refresh_api_combo()
+            self.settigns_tab.aoe4net_error_msg(
+                retry_callback=self.run_new_game_check)
         else:
+            self.settigns_tab.message("")  # Clear a potential API error message
             if settings.log_matches:
                 log_match(game_data)
             processed = hf.process_game(game_data)

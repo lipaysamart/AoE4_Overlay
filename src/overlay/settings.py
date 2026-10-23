@@ -28,6 +28,10 @@ class _Settings:
         self.max_games_history: int = 100
         self.civ_stats_color: str = "#BC8AEA"
         self.open_overlay_on_new_game = True
+        # aoe4world API endpoints (first one is the official default)
+        self.api_base_url: str = "https://aoe4world.com/api/v0"
+        self.api_base_urls: List[str] = ["https://aoe4world.com/api/v0"]
+        self.api_auto_failover: bool = True  # auto-switch endpoint on repeated failures
         self.show_graph = {"1": True, "2": True, "3": True, "4": True}
         self.team_colors = ((74, 255, 2, 0.35), (3, 179, 255, 0.35),
                             (255, 0, 0, 0.35), (255, 0, 255, 0.35), (255, 255,

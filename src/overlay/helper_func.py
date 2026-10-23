@@ -1,6 +1,7 @@
 import json
 import os
 import pathlib
+import re
 import sys
 import time
 import traceback
@@ -56,6 +57,14 @@ def version_check(version: str) -> str:
     except Exception:
         logger.warning("Failed to check for a new version")
     return ""
+
+
+def normalize_api_url(url: str) -> str:
+    """ Normalizes and validates an API base url. Returns '' if invalid. """
+    url = url.strip().rstrip('/')
+    if not re.match(r'^https?://[^\s]+$', url):
+        return ''
+    return url
 
 
 def create_custom_files():

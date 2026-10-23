@@ -7,7 +7,8 @@ import requests
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from overlay.i18n import get_language, tr
-from overlay.api_checking import find_player
+from overlay.api_checking import find_player, ping_endpoint
+from overlay.helper_func import normalize_api_url
 from overlay.custom_widgets import CustomKeySequenceEdit
 from overlay.logging_func import get_logger
 from overlay.overlay_widget import AoEOverlay
@@ -122,6 +123,54 @@ class SettingsTab(QtWidgets.QWidget):
         self.btn_change_position.clicked.connect(
             self.overlay_widget.change_state)
         overlay_layout.addWidget(self.btn_change_position, 2, 0, 1, 2)
+
+        ### API box
+        api_box = QtWidgets.QGroupBox(tr("API"))
+        api_box.setMinimumWidth(400)
+        api_box.setSizePolicy(
+            QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed,
+                                  QtWidgets.QSizePolicy.Fixed))
+        api_layout = QtWidgets.QGridLayout()
+        api_box.setLayout(api_layout)
+        self.main_layout.addWidget(api_box)
+
+        # Endpoint selector
+        api_layout.addWidget(QtWidgets.QLabel(tr("API endpoint:")), 0, 0)
+        self.api_combo = QtWidgets.QComboBox()
+        self.api_combo.setMinimumWidth(260)
+        self.api_combo.currentTextChanged.connect(self.api_endpoint_changed)
+        api_layout.addWidget(self.api_combo, 0, 1, 1, 2)
+        self.refresh_api_combo()
+
+        # New endpoint input + add button
+        self.api_input = QtWidgets.QLineEdit()
+        self.api_input.setPlaceholderText("https://example.com/api/v0")
+        self.api_input.setFocusPolicy(QtCore.Qt.ClickFocus)
+        api_layout.addWidget(self.api_input, 1, 0, 1, 2)
+
+        self.api_add_btn = QtWidgets.QPushButton(tr("Add"))
+        self.api_add_btn.clicked.connect(self.add_api_endpoint)
+        api_layout.addWidget(self.api_add_btn, 1, 2)
+
+        # Test button, remove button, auto-switch checkbox
+        self.api_test_btn = QtWidgets.QPushButton(tr("Test connection"))
+        self.api_test_btn.setToolTip(
+            tr("Test the connection to the selected API endpoint"))
+        self.api_test_btn.clicked.connect(self.test_api_endpoint)
+        api_layout.addWidget(self.api_test_btn, 2, 0)
+
+        self.api_auto_checkbox = QtWidgets.QCheckBox(
+            tr("Auto-switch endpoint on failure"))
+        self.api_auto_checkbox.setToolTip(
+            tr("Automatically switch to a backup API endpoint when requests keep failing"))
+        self.api_auto_checkbox.setChecked(settings.api_auto_failover)
+        self.api_auto_checkbox.stateChanged.connect(
+            self.api_auto_failover_changed)
+        api_layout.addWidget(self.api_auto_checkbox, 2, 1)
+
+        self.api_remove_btn = QtWidgets.QPushButton(tr("Remove"))
+        self.api_remove_btn.clicked.connect(self.remove_api_endpoint)
+        api_layout.addWidget(self.api_remove_btn, 2, 2)
 
         # Language preference is saved now, but translations change on restart.
         language_box = QtWidgets.QGroupBox("Language / 语言")
@@ -240,16 +289,109 @@ class SettingsTab(QtWidgets.QWidget):
             self._retry_callback = None
             self.retry_button.hide()
 
-    def aoe4net_error_msg(self, retry_callback: Optional[Callable] = None):
+    def aoe4net_error_msg(self,
+                          retry_callback: Optional[Callable] = None,
+                          endpoint: str = ""):
         """ Shows an API error message, optionally with a retry button """
         self.message(
-            tr('An issue with <a href="https://aoeiv.net/">AoEIV.net</a> servers. Data shown on the overlay are unaffected,<br> '
-               'but other stats in this app might not show correctly.<br>For additional stats check your '
-               '<a href="https://aoe4world.com/players/{profile_id}">AoE4 World profile</a>.',
-               profile_id=settings.profile_id),
+            tr('Cannot reach the API endpoint ({endpoint}).<br>'
+               'Check your network or proxy, or switch to a backup API endpoint below.',
+               endpoint=endpoint or settings.api_base_url),
             color='red')
         self._retry_callback = retry_callback
         self.retry_button.setVisible(retry_callback is not None)
+
+    def refresh_api_combo(self):
+        """ Reloads the endpoint selector from settings """
+        if settings.api_base_url not in settings.api_base_urls:
+            settings.api_base_urls.append(settings.api_base_url)
+        self.api_combo.blockSignals(True)
+        self.api_combo.clear()
+        self.api_combo.addItems(settings.api_base_urls)
+        self.api_combo.setCurrentText(settings.api_base_url)
+        self.api_combo.blockSignals(False)
+
+    def api_endpoint_changed(self, text: str):
+        """ Switches the active API endpoint """
+        text = text.strip()
+        if not text or text == settings.api_base_url:
+            return
+        if text not in settings.api_base_urls:
+            return
+        settings.api_base_url = text
+        try:
+            settings.save()
+        except Exception:
+            logger.exception("Failed to save settings")
+        logger.info(f"API endpoint switched to: {text}")
+        self.notification(tr("API endpoint switched"), "#359c20")
+
+    def add_api_endpoint(self):
+        """ Adds a new backup API endpoint """
+        url = normalize_api_url(self.api_input.text())
+        if not url:
+            self.notification(tr("Invalid address"), "red")
+            return
+        if url not in settings.api_base_urls:
+            settings.api_base_urls.append(url)
+        settings.api_base_url = url
+        try:
+            settings.save()
+        except Exception:
+            logger.exception("Failed to save settings")
+        self.api_input.setText("")
+        self.refresh_api_combo()
+        logger.info(f"API endpoint added: {url}")
+        self.notification(tr("Endpoint added"), "#359c20")
+
+    def remove_api_endpoint(self):
+        """ Removes the selected API endpoint """
+        url = self.api_combo.currentText().strip()
+        if len(settings.api_base_urls) <= 1:
+            self.notification(tr("Keep at least one endpoint"), "red")
+            return
+        if url in settings.api_base_urls:
+            settings.api_base_urls.remove(url)
+        if settings.api_base_url == url:
+            settings.api_base_url = settings.api_base_urls[0]
+        try:
+            settings.save()
+        except Exception:
+            logger.exception("Failed to save settings")
+        self.refresh_api_combo()
+        logger.info(f"API endpoint removed: {url}")
+        self.notification(tr("Endpoint removed"), "#359c20")
+
+    def api_auto_failover_changed(self, state: int):
+        settings.api_auto_failover = bool(state)
+        try:
+            settings.save()
+        except Exception:
+            logger.exception("Failed to save settings")
+
+    def test_api_endpoint(self):
+        """ Tests the connection to the selected API endpoint """
+        url = self.api_combo.currentText().strip()
+        if not url:
+            return
+        self.api_test_btn.setEnabled(False)
+        self.notification(tr("Testing connection..."))
+        scheldule(self.test_api_done,
+                  ping_endpoint,
+                  url,
+                  error_callback=self.test_api_error)
+
+    def test_api_done(self, latency_ms: int):
+        self.api_test_btn.setEnabled(True)
+        self.notification(tr("Connection OK ({latency} ms)", latency=latency_ms),
+                          "#359c20")
+
+    def test_api_error(self, exc_data: Tuple[Type[BaseException], Exception,
+                                             TracebackType]):
+        self.api_test_btn.setEnabled(True)
+        exctype, value, formatted = exc_data
+        logger.warning(f"API endpoint test failed\n{formatted}")
+        self.notification(tr("Connection failed"), "red")
 
     def retry_last_action(self):
         """ Retries the last failed request """
