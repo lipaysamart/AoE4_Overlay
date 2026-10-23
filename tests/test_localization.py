@@ -217,8 +217,9 @@ class DesktopTests(unittest.TestCase):
         self.assertIn("玩家原文", page.profile_info.text())
         self.assertIn("玩家 ID：42", page.profile_info.text())
         page.aoe4net_error_msg()
-        self.assertIn("服务出现问题", page.msg.text())
-        self.assertIn("https://aoe4world.com/players/42", page.msg.text())
+        self.assertIn("无法连接数据接口", page.msg.text())
+        self.assertIn(self.settings.api_base_url, page.msg.text())
+        self.assertIn("切换 API 备用地址", page.msg.text())
         with patch("overlay.tab_settings.scheldule") as schedule:
             page.multi_search.setText("玩家原文")
             page.find_profile()
